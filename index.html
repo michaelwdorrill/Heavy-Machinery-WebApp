@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heavy Machinery</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Heavy Machinery</h1>
+    <div id="account-bar" class="account-bar hidden">
+      <span id="account-email"></span>
+      <button id="refresh-btn" class="btn-secondary">Refresh data</button>
+      <button id="signout-btn" class="btn-secondary">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="status-banner" class="status-banner hidden"></div>
+
+    <section id="login-view" class="card">
+      <h2>Sign in</h2>
+      <form id="login-form">
+        <label>Email <input type="email" id="login-email" autocomplete="username" required /></label>
+        <label>Password <input type="password" id="login-password" autocomplete="current-password" required /></label>
+        <button type="submit" class="btn-primary">Continue</button>
+      </form>
+    </section>
+
+    <section id="totp-view" class="card hidden">
+      <h2>Enter your authenticator code</h2>
+      <form id="totp-form">
+        <label>Code <input type="text" id="totp-code" inputmode="numeric" autocomplete="one-time-code" required /></label>
+        <button type="submit" class="btn-primary">Verify</button>
+        <button type="button" id="totp-back-btn" class="btn-secondary">Back</button>
+      </form>
+    </section>
+
+    <section id="dashboard-view" class="hidden">
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="sessions">Sessions</button>
+        <button class="tab-btn" data-tab="progression">Progression</button>
+      </nav>
+
+      <div id="tab-sessions" class="tab-panel">
+        <div class="panel-columns">
+          <div class="card session-list-card">
+            <div class="card-header-row">
+              <h2>Sessions</h2>
+              <button id="export-all-json-btn" class="btn-secondary">Export full history (JSON)</button>
+            </div>
+            <ul id="session-list" class="session-list"></ul>
+          </div>
+          <div class="card session-detail-card">
+            <div id="session-detail">
+              <p class="muted">Select a session to see its sets.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-progression" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header-row">
+            <h2>Progression</h2>
+            <div class="progression-controls">
+              <select id="exercise-select"></select>
+              <button id="export-progression-csv-btn" class="btn-secondary">Export CSV</button>
+            </div>
+          </div>
+          <div id="progression-chart"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

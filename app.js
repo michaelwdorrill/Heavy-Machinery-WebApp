@@ -192,19 +192,43 @@ function renderSessionDetail(session) {
   const table = document.createElement("table");
   table.innerHTML = `<thead><tr><th>Exercise</th><th>Set</th><th>Weight</th><th>Reps</th><th>RIR</th></tr></thead>`;
   const tbody = document.createElement("tbody");
+  let previousExerciseId = null;
   for (const set of sets) {
+    const isGroupStart = set.exerciseId !== previousExerciseId;
+    previousExerciseId = set.exerciseId;
+
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${exerciseName(set.exerciseId)}${set.isWarmup ? " (warmup)" : ""}</td>
-      <td>${set.setNumber}</td>
-      <td>${set.actualWeightLbs} lbs</td>
-      <td>${set.actualReps ?? "—"}</td>
-      <td>${set.rir ?? "—"}</td>
-    `;
+    if (isGroupStart) tr.className = "set-group-start";
+
+    const exerciseCell = document.createElement("td");
+    exerciseCell.className = set.isWarmup ? "exercise-name warmup-tag" : "exercise-name";
+    if (isGroupStart) {
+      exerciseCell.textContent = exerciseName(set.exerciseId) + (set.isWarmup ? " (warmup)" : "");
+    } else {
+      exerciseCell.className += " set-continuation";
+      exerciseCell.textContent = set.isWarmup ? "warmup" : "";
+    }
+    tr.appendChild(exerciseCell);
+
+    const cells = [set.setNumber, formatWeight(set), set.actualReps ?? "—", set.rir ?? "—"];
+    for (const value of cells) {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    }
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
   container.appendChild(table);
+}
+
+/** Bodyweight movements log 0 lbs by design — "0 lbs" reads as a data gap,
+ *  "BW" reads as intentional. */
+function formatWeight(set) {
+  const exercise = store.exercises.get(set.exerciseId);
+  const isBodyweight = exercise?.barType === "BODYWEIGHT" || exercise?.barType === "BODYWEIGHT_LOADED";
+  if (isBodyweight && set.actualWeightLbs === 0) return "BW";
+  return `${set.actualWeightLbs} lbs`;
 }
 
 function exportSession(session, sets) {

@@ -53,9 +53,13 @@ export function sortedSessions(store) {
 }
 
 export function setsForSession(store, sessionId) {
+  // `setNumber` resets per exercise, so sorting by it alone interleaves
+  // exercises performed in the same session. `timestamp` (when the set was
+  // actually logged) is the true workout order and keeps each exercise's
+  // sets contiguous; setNumber only breaks ties.
   return [...store.completedSets.values()]
     .filter((s) => s.sessionId === sessionId)
-    .sort((a, b) => a.setNumber - b.setNumber);
+    .sort((a, b) => a.timestamp - b.timestamp || a.setNumber - b.setNumber);
 }
 
 /** Exercise ids that appear in at least one completed set, with a display

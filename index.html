@@ -41,6 +41,7 @@
       <nav class="tabs">
         <button class="tab-btn active" data-tab="sessions">Sessions</button>
         <button class="tab-btn" data-tab="progression">Progression</button>
+        <button class="tab-btn" data-tab="history">History</button>
       </nav>
 
       <div id="tab-sessions" class="tab-panel">
@@ -70,6 +71,16 @@
             </div>
           </div>
           <div id="progression-chart"></div>
+        </div>
+      </div>
+
+      <div id="tab-history" class="tab-panel hidden">
+        <div class="card">
+          <div class="card-header-row">
+            <h2>Full history</h2>
+            <button id="export-all-json-btn-history" class="btn-secondary">Export full history (JSON)</button>
+          </div>
+          <div id="history-list"></div>
         </div>
       </div>
     </section>

@@ -62,6 +62,16 @@ export function setsForSession(store, sessionId) {
     .sort((a, b) => a.timestamp - b.timestamp || a.setNumber - b.setNumber);
 }
 
+/** Every session with its sets attached, newest session first — feeds the
+ *  History tab's single continuous view (as opposed to the Sessions tab's
+ *  one-at-a-time click-through). */
+export function allHistoryRows(store) {
+  return sortedSessions(store).map((session) => ({
+    session,
+    sets: setsForSession(store, session.id),
+  }));
+}
+
 /** Exercise ids that appear in at least one completed set, with a display
  *  name, sorted alphabetically — populates the progression picker. */
 export function exercisesWithHistory(store) {

@@ -271,6 +271,14 @@ td.exercise-name { font-variant-numeric: normal; font-weight: 500; }
 td.exercise-name.warmup-tag { color: var(--text-muted); font-weight: 400; }
 td.set-continuation { color: var(--text-muted); }
 
+.history-session { margin-bottom: 32px; }
+.history-session:last-child { margin-bottom: 0; }
+.history-session h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
 .progression-controls { display: flex; gap: 8px; align-items: center; }
 
 .progression-chart { width: 100%; }

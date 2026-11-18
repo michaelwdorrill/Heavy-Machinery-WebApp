@@ -1,7 +1,7 @@
 import { signInEmail, verifyTotp, isSignedIn, signOut, AuthError } from "./auth.js";
 import { fetchAllSince, ApiError } from "./api.js";
 import { storage } from "./storage.js";
-import { storeFromPlain, mergeInto, storeToPlain, sortedSessions, setsForSession, exercisesWithHistory, progressionSeries } from "./model.js";
+import { storeFromPlain, mergeInto, storeToPlain, sortedSessions, setsForSession, exercisesWithHistory, progressionSeries, allHistoryRows } from "./model.js";
 import { renderProgressionChart } from "./charts.js";
 import { downloadJson, downloadCsv } from "./export.js";
 
@@ -87,6 +87,7 @@ for (const btn of document.querySelectorAll(".tab-btn")) {
       panel.classList.toggle("hidden", panel.id !== `tab-${btn.dataset.tab}`);
     }
     if (btn.dataset.tab === "progression") renderProgressionTab();
+    if (btn.dataset.tab === "history") renderHistoryTab();
   });
 }
 
@@ -189,6 +190,12 @@ function renderSessionDetail(session) {
     container.appendChild(notes);
   }
 
+  container.appendChild(buildSetsTable(sets));
+}
+
+/** Shared row-shape for a session's sets — used by both the Sessions tab's
+ *  per-session detail view and the History tab's continuous listing. */
+function buildSetsTable(sets) {
   const table = document.createElement("table");
   table.innerHTML = `<thead><tr><th>Exercise</th><th>Set</th><th>Weight</th><th>Reps</th><th>RIR</th></tr></thead>`;
   const tbody = document.createElement("tbody");
@@ -210,7 +217,11 @@ function renderSessionDetail(session) {
     }
     tr.appendChild(exerciseCell);
 
-    const cells = [set.setNumber, formatWeight(set), set.actualReps ?? "—", set.rir ?? "—"];
+    // A deliberately-logged "didn't attempt" set (phone-side: the "Didn't
+    // attempt this set" button) reads as 0 reps — reads as a data gap
+    // unless called out, so it gets its own label instead of "0".
+    const repsLabel = set.notAttempted ? "not attempted" : set.actualReps ?? "—";
+    const cells = [set.setNumber, formatWeight(set), repsLabel, set.rir ?? "—"];
     for (const value of cells) {
       const td = document.createElement("td");
       td.textContent = value;
@@ -219,7 +230,7 @@ function renderSessionDetail(session) {
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
-  container.appendChild(table);
+  return table;
 }
 
 /** Bodyweight movements log 0 lbs by design — "0 lbs" reads as a data gap,
@@ -240,6 +251,48 @@ function exportSession(session, sets) {
 }
 
 el("export-all-json-btn").addEventListener("click", () => {
+  downloadJson("heavy-machinery-full-export.json", storeToPlain(store));
+});
+
+// ── History tab ──────────────────────────────────────────────────────────────
+
+/** Every session and its sets on one continuous, scrollable page — unlike
+ *  the Sessions tab, which shows one session at a time and requires
+ *  clicking through the list. */
+function renderHistoryTab() {
+  const container = el("history-list");
+  const rows = allHistoryRows(store);
+  container.replaceChildren();
+
+  if (rows.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No synced sessions yet — complete a workout on your phone and sync.";
+    container.appendChild(empty);
+    return;
+  }
+
+  for (const { session, sets } of rows) {
+    const section = document.createElement("section");
+    section.className = "history-session";
+
+    const heading = document.createElement("h3");
+    heading.textContent = `${workoutName(session.workoutId)} — ${formatDate(session.startTimestamp)} (${formatDuration(session)})`;
+    section.appendChild(heading);
+
+    if (session.notes) {
+      const notes = document.createElement("p");
+      notes.className = "muted";
+      notes.textContent = session.notes;
+      section.appendChild(notes);
+    }
+
+    section.appendChild(buildSetsTable(sets));
+    container.appendChild(section);
+  }
+}
+
+el("export-all-json-btn-history").addEventListener("click", () => {
   downloadJson("heavy-machinery-full-export.json", storeToPlain(store));
 });
 
